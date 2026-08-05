@@ -59,3 +59,62 @@ button {
   font: inherit;
   cursor: pointer;
 }
+
+/* ===================================
+   3. Layout層（レイアウト構成・枠組み）
+=================================== */
+
+/* コンテンツ中央寄せ・幅制限用のインナー枠 */
+.l-inner {
+  width: 100%;
+  max-width: 1080px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+/* ヘッダーレイアウト */
+.l-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--color-white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.l-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+
+/* セクション全体の共通レイアウト */
+.l-section {
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+@media (min-width: 768px) {
+  .l-section {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+}
+
+.l-section--bg-light {
+  background-color: var(--color-bg-light);
+}
+
+.l-main {
+  width: 100%;
+}
+
+/* フッターレイアウト */
+.l-footer {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: var(--color-white);
+  text-align: center;
+}
