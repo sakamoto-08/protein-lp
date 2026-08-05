@@ -118,3 +118,80 @@ button {
   background-color: var(--color-white);
   text-align: center;
 }
+
+/* ===================================
+   4. Component層（共通パーツ）
+=================================== */
+
+/* 共通タイトル見出し */
+.c-heading-primary {
+  font-size: 1.75rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--color-text);
+}
+
+@media (min-width: 768px) {
+  .c-heading-primary {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+  }
+}
+
+/* 共通ボタン */
+.c-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1.75rem;
+  font-weight: bold;
+  border-radius: var(--radius-md);
+  transition: opacity 0.3s ease, transform 0.2s ease;
+  text-align:center;
+}
+
+.c-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+/* ボタンバリエーション（メイン・アクセント） */
+.c-btn--primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.c-btn--accent {
+  background-color: var(--color-accent);
+  color: var(--color-white);
+}
+
+/* ===================================
+   5. project層（各セクション装飾）
+=================================== */
+
+/* ヒーローセクション */
+.p-hero {
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  text-align: center;
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.p-hero__title {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+/* 診断エリアカード枠 */
+.p-diagnosis__card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+  margin: 0 auto;
+}
