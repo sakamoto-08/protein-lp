@@ -45,8 +45,9 @@
 
         <!-- 5.比較・シミュレーターエリア -->
         <section class="l-section p-simulator" id="simulator">
-            <div class="l-inner">
-                <h2>プロテイン比較・シミュレーター</h2>
+            <div class="l-inner js-simulator-container">
+                <h2 class="c-heading-primary">プロテイン比較・シミュレーター</h2>
+                <p style="text-align: center; color: #6b7280;">※パーソナル診断を完了すると、こちらに価格計算と比較表が表示されます。</p>
             </div>
         </section>
 
@@ -63,8 +64,8 @@
     <footer class="l-footer">
         <p class="l-footer__copyright">&copy; 2026 Protein Select All Rights Reserved.</p>
     </footer>
-    <!-- JavaScriptの読み込み -->
-    <script src="js/data.js"></script>
+    <!-- JavaScriptの読み込み（ES Modules形式でmain.jsを読み込み） -->
+    <script type="module" src="js/main.js"></script>
 </body>
 
 </html>
