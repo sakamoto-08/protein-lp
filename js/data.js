@@ -25,12 +25,12 @@ export const diagnosisQuestions = [
 //==============================================
 // 2. 商品データ定義（全4種類）
 //==============================================
-export const proteinResults = {
+export const products = {
     whey: {
         id: "whey",
         code: "A",
         name: "ホエイプロテイン HIGH-P",
-        price: 4,980,
+        price: 4980,
         protein: "24.5g",
         calories: "120kcal",
         image: "https://placehold.co/400x300/3b82f6/ffffff?text=WHEY+HIGH-P",
@@ -41,7 +41,7 @@ export const proteinResults = {
         id: "soy",
         code: "B",
         name: "ソイプロテイン SLIM-BEAUTY",
-        price: 4,280,
+        price: 4280,
         protein: "18.5g",
         calories: "110kcal",
         image: "https://placehold.co/400x300/3b82f6/ffffff?text=SOY+SLIM-BEAUTY",
@@ -52,7 +52,7 @@ export const proteinResults = {
         id: "multi",
         code: "C",
         name: "マルチバランス　プロテイン",
-        price: 3,980,
+        price: 3980,
         protein: "15.5g",
         calories: "100kcal",
         image: "https://placehold.co/400x300/3b82f6/ffffff?text=MULTI+BALANCE",
@@ -63,7 +63,7 @@ export const proteinResults = {
         id: "plant",
         code: "D",
         name: "プラントベース　プロテイン",
-        price: 3,480,
+        price: 3480,
         protein: "13.5g",
         calories: "90kcal",
         image: "https://placehold.co/400x300/3b82f6/ffffff?text=PLANT+BASE",
