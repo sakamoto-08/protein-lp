@@ -78,11 +78,8 @@ export const proteinResults = {
 export function calculateResult(answers) {
     const { goal, frequency } = answers;
 
-    if (goal === "muscle") {
-        return frequency ==== "low" ? products.plant : products.whey;
-}
 if (goal === "muscle") {
-    return frequency === "low" ? products.plant * products.whey ;
+    return frequency === "low" ? products.plant : products.whey;
 }
 if (goal === "diet") {
     return products.soy;
