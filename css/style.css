@@ -195,3 +195,83 @@ button {
   max-width: 600px;
   margin: 0 auto;
 }
+
+/* ===================================
+   6. 診断エリア（チケット01の装飾）
+=================================== */
+
+/* 1. 診断カード（中央配置・シャドウ・角丸） */
+.p-diagnosis__card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);       /* 角丸（16px） */
+  padding: 2.5rem 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); /* 柔らかいシャドウ */
+  max-width: 600px;                      /* 横幅の上限 */
+  margin: 0 auto;                        /* 中央に配置 */
+  text-align: center;
+}
+
+/* 2. プログレスバー（進捗度メーター） */
+.p-diagnosis__progress {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.p-diagnosis__bar {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 9999px;
+  transition: width 0.4s ease;          /* バーが伸びるアニメーション */
+}
+
+.p-diagnosis__step {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  letter-spacing: 0.05em;
+}
+
+/* 3. 選択肢ボタンのレイアウトとホバーアニメーション */
+.p-diagnosis__options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.p-diagnosis__option-btn {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-white);
+  border: 2px solid #e5e7eb;             /* 薄いグレーの枠線 */
+  border-radius: var(--radius-md);       /* 角丸（8px） */
+  color: var(--color-text);
+  font-size: 1rem;
+  text-align: left;
+  transition: all 0.2s ease;             /* ホバー時のスムーズな変化 */
+}
+
+/* ボタンにマウスを乗せた時（ホバー） */
+.p-diagnosis__option-btn:hover {
+  border-color: var(--color-primary);    /* 枠線をブルーに */
+  background-color: #eff6ff;             /* 薄いブルー背景 */
+  transform: translateY(-2px);           /* 上に2px浮き上がる */
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); /* ブルー系の影 */
+}
+
+/* 4. 戻るボタン */
+.p-diagnosis__back-btn {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.p-diagnosis__back-btn:hover {
+  color: var(--color-text);
+}
