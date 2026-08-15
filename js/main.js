@@ -39,7 +39,7 @@ function renderQuestion() {
     container.innerHTML = `
     <div class="p-diagnosis__card">
       <div class="p-diagnosis__progress">
-        <div class="p-diagnosis__bar" style="width: ${progressPercent}%;"></div>
+        <div class="p-diagnosis__progress-bar" style="width: ${progressPercent}%;"></div>
       </div>
       <p class="p-diagnosis__step">STEP ${state.currentStep + 1} / ${diagnosisQuestions.length}</p>
       <h3 class="p-diagnosis__question" style= "font-size: 1.25rem; font-weight: bold; margin: 1rem 0;">${q.question}</h3>
