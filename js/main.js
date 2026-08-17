@@ -1,173 +1,142 @@
-import { diagnosisQuestions , products, calculateResult } from "./data.js";
+import { proteinProducts, diagnosisQuestions } from './data.js';
 
-//==============================================
-// 1. アプリケーションの状態管理（State）
-//==============================================
+// 状態管理（診断の進捗と回答データ）
 const state = {
-    currentStep: 0,
-    answers: {},
-    selectedProduct: null,
-    quantity: 1,
+  currentStep: 0,
+  answers: {},
+  selectedProduct: null
 };
 
-//==============================================
-// 2. 初期化
-//==============================================
-document.addEventListener("DOMContentLoaded", () => {
-    renderQuestion();
+// 初期化処理
+document.addEventListener('DOMContentLoaded', () => {
+  renderQuestion();
 });
 
-//==============================================
-// 3. 診断画面のレンダリング
-//==============================================
+// 1. 質問カードの描画処理
 function renderQuestion() {
-    const container = document.querySelector(".js-diagnosis-container");
-    if (!container) return;
+  const container = document.querySelector('.js-diagnosis-container');
+  if (!container) return;
 
-    //全ての質問に回答し終えた場合
-    if (state.currentStep >= diagnosisQuestions.length) {
-        state.selectedProduct = calculateResult(state.answers);
-        renderResult(container);
-        renderSimulator();
-        return;
-    }
+  // 全ての質問に答え終えた場合（結果表示へ）
+  if (state.currentStep >= diagnosisQuestions.length) {
+    calculateResult();
+    renderResult(container);
+    renderSimulator();
+    return;
+  }
 
-    //質問カードの描画
-    const q = diagnosisQuestions[state.currentStep];
-    const progressPercent = ((state.currentStep + 1) / diagnosisQuestions.length) * 100;
+  const q = diagnosisQuestions[state.currentStep];
+  const progressPercent = ((state.currentStep + 1) / diagnosisQuestions.length) * 100;
 
-    container.innerHTML = `
+  container.innerHTML = `
     <div class="p-diagnosis__card">
       <div class="p-diagnosis__progress">
-        <div class="p-diagnosis__progress-bar" style="width: ${progressPercent}%;"></div>
+        <div class="p-diagnosis__progress-bar" style="width: ${progressPercent}%"></div>
       </div>
       <p class="p-diagnosis__step">STEP ${state.currentStep + 1} / ${diagnosisQuestions.length}</p>
-      <h3 class="p-diagnosis__question" style= "font-size: 1.25rem; font-weight: bold; margin: 1rem 0;">${q.question}</h3>
+      <h3 style="margin: 1rem 0; font-size: 1.25rem;">${q.question}</h3>
       <div class="p-diagnosis__options">
-        ${q.options
-            .map(
-                (opt) => `
-          <button class="c-btn p-diagnosis__option-btn" data-value="${opt.value}">
-            ${opt.text}
+        ${q.options.map((opt) => `
+          <button class="p-diagnosis__option-btn js-option-btn" data-value="${opt.value}">
+            ${opt.label}
           </button>
-         `
-            )
-            .join("")}
+        `).join('')}
       </div>
-      ${
-        state.currentStep > 0
-            ? `<button class="p-diagnosis__back-btn js-back-btn">← 前の質問に戻る</button>`
-            : ""
-    }
+      ${state.currentStep > 0 ? `
+        <button class="p-diagnosis__back-btn js-back-btn">← 前の質問に戻る</button>
+      ` : ''}
     </div>
   `;
 
-    //選択肢クリックイベント
-    container.querySelectorAll(".p-diagnosis__option-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-            const val = e.currentTarget.dataset.value;
-            state.answers[q.id] = val;
-            state.currentStep++;
-            renderQuestion();
-        });
+  // イベントリスナーの登録
+  container.querySelectorAll('.js-option-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      state.answers[`q${q.id}`] = e.currentTarget.dataset.value;
+      state.currentStep++;
+      renderQuestion();
     });
+  });
 
-    //戻るボタンイベント
-    const backBtn = container.querySelector(".js-back-btn");
-    if (backBtn) {
-        backBtn.addEventListener("click", () => {
-            state.currentStep--;
-            renderQuestion();
-        });
-    }
+  const backBtn = container.querySelector('.js-back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      state.currentStep--;
+      renderQuestion();
+    });
+  }
 }
 
-//==============================================
-// 4. 診断結果画面のレンダリング
-//==============================================
+// 2. 診断結果の計算ロジック
+function calculateResult() {
+  const goal = state.answers.q1 || 'muscle';
+  // ユーザーの目的にマッチする商品を検索（なければ先頭の商品）
+  state.selectedProduct = proteinProducts.find(p => p.targetGoal === goal) || proteinProducts[0];
+}
+
+// 3. 診断結果の描画
 function renderResult(container) {
-    const p = state.selectedProduct;
-
-    container.innerHTML = `
-    <div class="p-diagnosis__card p-diagnosis__result">
-      <span class="p-diagnosis__badge">${p.tag}</span>
-      <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">${p.catch}</h3>
-      <div class="p-diagnosis__result-body">
-        <img src="${p.image}" alt="${p.name}" class="p-diagnosis__img" />
-        <div class="p-diagnosis__info">
-          <h4 style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem;">${p.name}</h4>
-          <p class="p-diagnosis__price" style="margin-bottom: 0.5rem;">通常価格: <strong>¥${p.price.toLocaleString()}</strong> (税込)</p>
-          <p class="p-diagnosis__desc" style="font-size: 0.9rem; color: #4b5563;">${p.desc}</p>
-        </div>
-      </div>
-      <div class="p-diagnosis__actions" style="margin-top: 1.5rem;">
-        <button class="c-btn c-btn--accent js-retry-btn">もう一度診断する</button>
-        <a href="#contact" class="c-btn c-btn--primary">この商品で申し込む</a>
-      </div>
+  const product = state.selectedProduct;
+  container.innerHTML = `
+    <div class="p-diagnosis__card" style="border: 2px solid var(--color-primary);">
+      <p style="color: var(--color-primary); font-weight: bold;">あなたにおすすめのプロテイン</p>
+      <h3 style="font-size: 1.5rem; margin: 0.5rem 0;">${product.name}</h3>
+      <p style="color: var(--color-text-sub); margin-bottom: 1rem;">タイプ: ${product.type}</p>
+      <p style="background: var(--color-bg-light); padding: 1rem; border-radius: var(--radius-md); font-size: 0.95rem;">
+        ${product.feature}
+      </p>
+      <button class="c-btn c-btn--primary" style="margin-top: 1.5rem; width: 100%;" onclick="document.getElementById('simulator').scrollIntoView({behavior: 'smooth'})">
+        月額コスト・比較シミュレーターを見る ↓
+      </button>
     </div>
-    `;
-
-    // リトライボタンのイベント設定
-    container.querySelector(".js-retry-btn").addEventListener("click", () => {
-        state.currentStep = 0;
-        state.answers = {};
-        state.selectedProduct = null;
-        state.quantity = 1;
-        renderQuestion();
-
-        // シミュレーターを初期状態に戻す
-        const simulatorContainer = document.querySelector(".js-simulator-container");
-        if (simulatorContainer) {
-            simulatorContainer.innerHTML = `
-            <h2 class="c-heading">プロテイン比較・シミュレーター</h2>
-            <p style="text-align: center; color: #6b7280;">※パーソナル診断を完了すると、こちらに 価格計算と比較表が表示されます。</p>
-            `;
-        }
-    });
+  `;
 }
 
-//==============================================
-// 5. シミュレーター（価格計算・比較表）のレンダリング
-//==============================================
+// 4. 比較・シミュレーターエリアの動的描画
 function renderSimulator() {
-    const container = document.querySelector(".js-simulator-container");
-    if (!container || !state.selectedProduct) return;
+  const container = document.querySelector('.js-simulator-container');
+  if (!container) return;
 
-    const p = state.selectedProduct;
+  const timesPerDay = parseInt(state.answers.q2 || '1', 10);
+  const monthlyServings = timesPerDay * 30; // 1ヶ月（30日換算）の必要食数
 
-    // 数量変更のイベントリスナーを設定する内部関数
-    const updateSimulator = () => {
-        const totalPrice = p.price * state.quantity;
+  container.innerHTML = `
+    <h2 class="c-heading-primary">1ヶ月のコスト比較シミュレーション</h2>
+    <p style="text-align: center; margin-bottom: 2rem; color: var(--color-text-sub);">
+      想定使用ペース：<strong>1日 ${timesPerDay} 回</strong>（月間約 ${monthlyServings} 食）
+    </p>
 
-        container.innerHTML = `
-        <h2 class="c-heading">プロテイン比較・シミュレーター</h2>
-        <div class="p-simulator__calculator" style="margin: 2rem 0; padding: 1.5rem; background: #f9fafb; border-radius: 8px;">
-          <h3 style="font-weight: bold; margin-bottom: 1rem;">【${p.name}】購入シミュレーション</h3>
-          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <label for="quantity-select">数量（個）:</label>
-            <select id="quantity-select" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc;">
-              ${[1, 2, 3, 4, 5]
-                  .map(
-                      (num) => `
-                <option value="${num}" ${state.quantity === num ? "selected" : ""}>${num}個</option>
-              `
-                  )
-                  .join("")}
-            </select>
-          </div>
-          <p style="font-size: 1.2rem;">合計金額: <strong style="color: #e11d48; font-size: 1.5rem;">¥${totalPrice.toLocaleString()}</strong> (税込)</p>
-        </div>
-      `;
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; background: var(--color-white); border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <thead>
+          <tr style="background-color: var(--color-bg-light); border-bottom: 2px solid var(--color-border);">
+            <th style="padding: 1rem; text-align: left;">商品名</th>
+            <th style="padding: 1rem; text-align: center;">1食分タンパク質</th>
+            <th style="padding: 1rem; text-align: right;">1個(1kg)価格</th>
+            <th style="padding: 1rem; text-align: right; color: var(--color-primary);">目安月額コスト</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${proteinProducts.map(p => {
+            const bagsNeeded = Math.ceil(monthlyServings / p.servingsPerBag);
+            const monthlyCost = bagsNeeded * p.pricePerBag;
+            const isRecommended = state.selectedProduct && state.selectedProduct.id === p.id;
 
-        // 数量変更イベントの設定
-        const selectEl = container.querySelector("#quantity-select");
-        if (selectEl) {
-            selectEl.addEventListener("change", (e) => {
-                state.quantity = Number(e.target.value);
-                updateSimulator();
-            });
-        }
-    };
-
-    updateSimulator();
+            return `
+              <tr style="border-bottom: 1px solid var(--color-border); ${isRecommended ? 'background-color: #eff6ff;' : ''}">
+                <td style="padding: 1rem; font-weight: bold;">
+                  ${p.name}
+                  ${isRecommended ? '<span style="display:inline-block; margin-left:0.5rem; font-size:0.75rem; background:var(--color-primary); color:white; padding:0.1rem 0.5rem; border-radius:4px;">おすすめ</span>' : ''}
+                </td>
+                <td style="padding: 1rem; text-align: center;">${p.proteinPerServing}g</td>
+                <td style="padding: 1rem; text-align: right;">¥${p.pricePerBag.toLocaleString()}</td>
+                <td style="padding: 1rem; text-align: right; font-weight: bold; color: var(--color-primary);">
+                  ¥${monthlyCost.toLocaleString()} <span style="font-size: 0.8rem; font-weight: normal; color: var(--color-text-sub);">(${bagsNeeded}袋)</span>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
