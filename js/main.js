@@ -73,9 +73,18 @@ function calculateResult() {
   state.selectedProduct = proteinProducts.find(p => p.targetGoal === goal) || proteinProducts[0];
 }
 
-// 3. 診断結果の描画
+// 3. 診断結果の描画（SNSシェア機能追加）
 function renderResult(container) {
   const product = state.selectedProduct;
+  
+  // SNS共有用のテキストとURLを準備
+  const shareText = encodeURIComponent(`私におすすめのプロテインは【${product.name}】でした！ #パーソナルプロテイン診断`);
+  const shareUrl = encodeURIComponent(window.location.href);
+
+  // 共有用URLの生成
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
+  const lineUrl = `https://social-plugins.line.me/lineit/share?url=${shareUrl}`;
+
   container.innerHTML = `
     <div class="p-diagnosis__card" style="border: 2px solid var(--color-primary);">
       <p style="color: var(--color-primary); font-weight: bold;">あなたにおすすめのプロテイン</p>
@@ -84,6 +93,18 @@ function renderResult(container) {
       <p style="background: var(--color-bg-light); padding: 1rem; border-radius: var(--radius-md); font-size: 0.95rem;">
         ${product.feature}
       </p>
+      
+      <!-- SNSシェアエリア -->
+      <div style="margin-top: 1.5rem; text-align: center;">
+        <p style="font-size: 0.875rem; color: var(--color-text-sub); margin-bottom: 0.5rem;">診断結果をシェアする</p>
+        <a href="${twitterUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 0.5rem 1rem; background-color: #000; color: #fff; border-radius: 4px; text-decoration: none; margin-right: 0.5rem; font-size: 0.875rem;">
+          𝕏 でシェア
+        </a>
+        <a href="${lineUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 0.5rem 1rem; background-color: #06C755; color: #fff; border-radius: 4px; text-decoration: none; font-size: 0.875rem;">
+          LINE で送る
+        </a>
+      </div>
+
       <button class="c-btn c-btn--primary" style="margin-top: 1.5rem; width: 100%;" onclick="document.getElementById('simulator').scrollIntoView({behavior: 'smooth'})">
         月額コスト・比較シミュレーターを見る ↓
       </button>
