@@ -3,7 +3,7 @@ import { proteinProducts, diagnosisQuestions } from './data.js';
 // 状態管理（診断の進捗と回答データ）
 const state = {
   currentStep: 0,
-  answers: {},
+  answers: {}, // 例: { q1: { value: 'muscle', scores: {...} }, ... }
   selectedProduct: null
 };
 
@@ -37,7 +37,7 @@ function renderQuestion() {
       <h3 style="margin: 1rem 0; font-size: 1.25rem;">${q.question}</h3>
       <div class="p-diagnosis__options">
         ${q.options.map((opt) => `
-          <button class="p-diagnosis__option-btn js-option-btn" data-value="${opt.value}">
+          <button class="p-diagnosis__option-btn js-option-btn">
             ${opt.label}
           </button>
         `).join('')}
@@ -48,10 +48,14 @@ function renderQuestion() {
     </div>
   `;
 
-  // イベントリスナーの登録
-  container.querySelectorAll('.js-option-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      state.answers[`q${q.id}`] = e.currentTarget.dataset.value;
+  // イベントリスナーの登録（インデックスでスコア情報を正確に取得）
+  container.querySelectorAll('.js-option-btn').forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+      const selectedOption = q.options[index];
+      state.answers[`q${q.id}`] = {
+        value: selectedOption.value,
+        scores: selectedOption.scores
+      };
       state.currentStep++;
       renderQuestion();
     });
@@ -66,22 +70,47 @@ function renderQuestion() {
   }
 }
 
-// 2. 診断結果の計算ロジック
+// 2. 診断結果の計算ロジック（スコア合算方式）
 function calculateResult() {
-  const goal = state.answers.q1 || 'muscle';
-  // ユーザーの目的にマッチする商品を検索（なければ先頭の商品）
-  state.selectedProduct = proteinProducts.find(p => p.targetGoal === goal) || proteinProducts[0];
+  const totalScores = {
+    'whey-standard': 0,
+    'soy-beauty': 0,
+    'isolate-pure': 0
+  };
+
+  // 全回答のスコアを加算
+  Object.keys(state.answers).forEach(qKey => {
+    const answer = state.answers[qKey];
+    if (answer && answer.scores) {
+      Object.keys(answer.scores).forEach(productId => {
+        if (totalScores[productId] !== undefined) {
+          totalScores[productId] += answer.scores[productId];
+        }
+      });
+    }
+  });
+
+  // 最高スコアの商品を選定
+  let bestProductId = 'whey-standard';
+  let maxScore = -Infinity;
+
+  Object.keys(totalScores).forEach(productId => {
+    if (totalScores[productId] > maxScore) {
+      maxScore = totalScores[productId];
+      bestProductId = productId;
+    }
+  });
+
+  state.selectedProduct = proteinProducts.find(p => p.id === bestProductId) || proteinProducts[0];
 }
 
-// 3. 診断結果の描画（SNSシェア機能追加）
+// 3. 診断結果の描画
 function renderResult(container) {
   const product = state.selectedProduct;
   
-  // SNS共有用のテキストとURLを準備
   const shareText = encodeURIComponent(`私におすすめのプロテインは【${product.name}】でした！ #パーソナルプロテイン診断`);
   const shareUrl = encodeURIComponent(window.location.href);
 
-  // 共有用URLの生成
   const twitterUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
   const lineUrl = `https://social-plugins.line.me/lineit/share?url=${shareUrl}`;
 
@@ -94,7 +123,6 @@ function renderResult(container) {
         ${product.feature}
       </p>
       
-      <!-- SNSシェアエリア -->
       <div style="margin-top: 1.5rem; text-align: center;">
         <p style="font-size: 0.875rem; color: var(--color-text-sub); margin-bottom: 0.5rem;">診断結果をシェアする</p>
         <a href="${twitterUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 0.5rem 1rem; background-color: #000; color: #fff; border-radius: 4px; text-decoration: none; margin-right: 0.5rem; font-size: 0.875rem;">
@@ -117,8 +145,9 @@ function renderSimulator() {
   const container = document.querySelector('.js-simulator-container');
   if (!container) return;
 
-  const timesPerDay = parseInt(state.answers.q2 || '1', 10);
-  const monthlyServings = timesPerDay * 30; // 1ヶ月（30日換算）の必要食数
+  // Q3の回答から飲用回数を取得
+  const timesPerDay = parseInt(state.answers.q3?.value || '1', 10);
+  const monthlyServings = timesPerDay * 30;
 
   container.innerHTML = `
     <h2 class="c-heading-primary">1ヶ月のコスト比較シミュレーション</h2>
