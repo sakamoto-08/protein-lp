@@ -2,6 +2,7 @@ import { proteinProducts, diagnosisQuestions } from "./data.js";
 
 // 定数定義（マジックナンバー回避）
 const DAYS_IN_MONTH = 30;
+const LOADING_DURATION_MS = 1500;
 
 // XSS対策用エスケープ関数
 function escapeHTML(str) {
@@ -32,9 +33,7 @@ function renderQuestion() {
   if (!container) return;
 
   if (state.currentStep >= diagnosisQuestions.length) {
-    calculateResult();
-    renderResult(container);
-    renderSimulator();
+    showLoadingThenResult(container);
     return;
   }
 
@@ -91,7 +90,47 @@ function renderQuestion() {
   }
 }
 
-// 2. 診断結果の計算ロジック（積算スコアの動的初期化）
+// 2. 診断完了後のローディング演出
+function showLoadingThenResult(container) {
+  renderLoading(container);
+
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  const delay = prefersReducedMotion ? 0 : LOADING_DURATION_MS;
+
+  setTimeout(() => {
+    calculateResult();
+    renderResult(container);
+    renderSimulator();
+    scrollToSection("diagnosis");
+  }, delay);
+}
+
+function renderLoading(container) {
+  container.innerHTML = `
+    <div class="p-diagnosis__card p-diagnosis__loading" role="status" aria-live="polite" aria-busy="true">
+      <div class="p-diagnosis__loading-spinner" aria-hidden="true"></div>
+      <p class="p-diagnosis__loading-text">あなたに最適なプロテインを分析中...</p>
+      <p class="p-diagnosis__loading-sub">回答内容をもとに最適な商品を選定しています</p>
+    </div>
+  `;
+}
+
+// ヘッダー高さを考慮したスムーススクロール
+function scrollToSection(sectionId) {
+  const target = document.getElementById(sectionId);
+  if (!target) return;
+
+  const header = document.querySelector(".l-header");
+  const headerHeight = header?.offsetHeight ?? 0;
+  const top =
+    target.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+
+  window.scrollTo({ top, behavior: "smooth" });
+}
+
+// 3. 診断結果の計算ロジック（積算スコアの動的初期化）
 function calculateResult() {
   // 商品データから動的にスコアオブジェクトを生成（ハードコーディング回避）
   const totalScores = proteinProducts.reduce((acc, product) => {
@@ -124,7 +163,7 @@ function calculateResult() {
     proteinProducts.find((p) => p.id === bestProductId) || proteinProducts[0];
 }
 
-// 3. 診断結果の描画
+// 4. 診断結果の描画
 function renderResult(container) {
   const product = state.selectedProduct;
 
@@ -165,14 +204,12 @@ function renderResult(container) {
   const scrollBtn = container.querySelector("#scrollToSimulatorBtn");
   if (scrollBtn) {
     scrollBtn.addEventListener("click", () => {
-      document
-        .getElementById("simulator")
-        ?.scrollIntoView({ behavior: "smooth" });
+      scrollToSection("simulator");
     });
   }
 }
 
-// 4. シミュレーター描画（定数活用）
+// 5. シミュレーター描画（定数活用）
 function renderSimulator() {
   const container = document.querySelector(".js-simulator-container");
   if (!container) return;
@@ -225,7 +262,7 @@ function renderSimulator() {
   `;
 }
 
-// 5. フォーム送信処理（関数として独立）
+// 6. フォーム送信処理（関数として独立）
 function initContactForm() {
   const form = document.getElementById("contactForm");
   const nameInput = document.getElementById("userName");
